@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>阿順下樓梯 ｜ AH-SHUN STAIR RUSH ・ 班級直笛聲控闖關</title>
+<meta name="description" content="阿順下樓梯：踩著漂浮的樓梯一路往下，閃開黑色尖刺氣球，可用鍵盤、觸控或直笛音高來控制。班級自製單機 HTML 遊戲。">
+<meta name="theme-color" content="#5c94fc">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;900&family=Noto+Sans+TC:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%235c94fc'/%3E%3Crect x='4' y='22' width='8' height='6' fill='%23efe2c4' stroke='%2378371a' stroke-width='1.5'/%3E%3Crect x='12' y='15' width='8' height='6' fill='%23efe2c4' stroke='%2378371a' stroke-width='1.5'/%3E%3Crect x='20' y='8' width='8' height='6' fill='%23efe2c4' stroke='%2378371a' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='7' r='4.5' fill='%23ffd52a' stroke='%2378371a' stroke-width='1.5'/%3E%3C/svg%3E">
+<style>
+:root{
+  --sky:#5c94fc;--sky-deep:#2d4c9a;--cream:#fff8dc;--sand:#f4d29c;--line:#bb672d;--edge:#78371a;
+  --ink:#382718;--muted:#7a5a3a;--yellow:#ffd52a;--yellow-dark:#c99412;--green:#2eaa57;--green-dark:#176d36;
+  --blue:#3b74d9;--red:#dc4740;--shadow:#59250f;--paper:#fffdf2;
+  --px:"Press Start 2P",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --round:Fredoka,"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;color:var(--ink);font-family:var(--round);line-height:1.65;overflow-x:hidden;
+  background:
+    radial-gradient(1000px 520px at 82% -8%,rgba(255,213,42,.5),transparent 60%),
+    radial-gradient(760px 420px at -10% 12%,rgba(255,255,255,.6),transparent 60%),
+    linear-gradient(180deg,var(--sky) 0%,#4a7fe8 42%,var(--sky-deep) 100%);
+  min-height:100vh;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+.wrap{width:min(1180px,92vw);margin-inline:auto}
+.pixel{font-family:var(--px);letter-spacing:.04em}
+
+/* ===== 雲 + 背景 ===== */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg .cloud{position:absolute;width:180px;height:60px;opacity:.9;
+  background:
+    radial-gradient(closest-side circle at 22% 72%,#fff 98%,transparent),
+    radial-gradient(closest-side circle at 46% 42%,#fff 98%,transparent),
+    radial-gradient(closest-side circle at 72% 70%,#fff 98%,transparent),
+    radial-gradient(closest-side circle at 34% 78%,#fff 98%,transparent);
+  filter:drop-shadow(0 8px 0 rgba(45,76,154,.12));animation:drift 46s linear infinite}
+.bg .c2{top:26%;width:120px;animation-duration:64s;animation-delay:-12s;opacity:.72}
+.bg .c1{top:9%}
+.bg .c3{top:58%;width:220px;animation-duration:78s;animation-delay:-30s;opacity:.5}
+.bg .c4{top:78%;width:150px;animation-duration:58s;animation-delay:-45s;opacity:.4}
+@keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
+
+/* ===== 頂部跑馬燈 ===== */
+.ticker{position:relative;z-index:3;background:var(--edge);color:var(--sand);border-bottom:4px solid var(--yellow);overflow:hidden}
+.ticker .track{display:flex;gap:38px;white-space:nowrap;padding:7px 0;animation:marq 26s linear infinite;font-size:12px;font-weight:800;letter-spacing:.14em}
+.ticker b{color:var(--yellow)}
+@keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ===== Header ===== */
+header{position:sticky;z-index:4;top:0;backdrop-filter:blur(6px);
+  background:linear-gradient(180deg,rgba(255,248,220,.97),rgba(244,210,156,.93));
+  border-bottom:4px solid var(--edge);box-shadow:0 6px 0 rgba(89,37,15,.25)}
+.nav{display:flex;align-items:center;gap:16px;padding:10px 0}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:900}
+.logo svg{width:42px;height:42px;flex:none;filter:drop-shadow(0 3px 0 rgba(89,37,15,.3))}
+.logo .t1{font-size:19px;line-height:1.05;letter-spacing:.04em;color:var(--ink)}
+.logo .t2{font-family:var(--px);font-size:8px;color:var(--green-dark);letter-spacing:.08em}
+nav.links{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+nav.links a{padding:8px 12px;border-radius:999px;text-decoration:none;font-weight:800;font-size:14px;color:var(--muted);border:3px solid transparent;transition:.14s}
+nav.links a:hover{color:var(--ink);background:#fff;border-color:var(--line);transform:translateY(-1px)}
+.cta{border:0;border-radius:999px;padding:11px 20px;font:900 16px var(--round);color:#3b3010;background:var(--yellow);
+  box-shadow:0 5px 0 var(--yellow-dark),inset 0 2px 0 rgba(255,255,255,.5);cursor:pointer;text-decoration:none;transition:.12s;white-space:nowrap}
+.cta:active{transform:translateY(4px);box-shadow:0 1px 0 var(--yellow-dark)}
+.cta.green{color:#fff;background:var(--green);box-shadow:0 5px 0 var(--green-dark),inset 0 2px 0 rgba(255,255,255,.35)}
+.cta.green:active{box-shadow:0 1px 0 var(--green-dark)}
+.cta.blue{color:#fff;background:var(--blue);box-shadow:0 5px 0 #1c438f}
+.cta.ghost{background:#fff;color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 rgba(89,37,15,.35)}
+
+/* ===== 共用卡片 ===== */
+main{position:relative;z-index:2;padding:26px 0 10px}
+section{margin:0 0 30px}
+.card{background:linear-gradient(180deg,var(--cream),var(--sand));border:4px solid var(--edge);border-radius:18px;
+  box-shadow:0 9px 0 var(--shadow),0 22px 40px rgba(20,30,70,.28),inset 0 3px 0 rgba(255,255,255,.85);padding:22px}
+.kicker{font-family:var(--px);font-size:9px;letter-spacing:.14em;color:var(--green-dark);text-transform:uppercase}
+h2.sec{font-size:34px;line-height:1.2;margin:6px 0 6px;font-weight:900;letter-spacing:.02em;
+  text-shadow:2px 2px 0 #fff,-1px -1px 0 rgba(120,55,26,.35)}
+h2.sec span.en{display:block;font-family:var(--px);font-size:10px;color:var(--muted);text-shadow:none;margin-top:8px;letter-spacing:.1em}
+.lead{color:var(--muted);font-size:16px;max-width:62ch}
+
+/* ===== Hero ===== */
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:26px;align-items:center}
+.hero .txt{padding:26px 26px 24px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:3px solid var(--line);
+  background:#fff;font-size:12px;font-weight:800;color:var(--muted)}
+.tag.hot{border-color:var(--red);color:#fff;background:var(--red)}
+.tag.go{border-color:var(--green);color:#fff;background:var(--green)}
+h1.title{margin:0;font-weight:900;font-size:clamp(40px,6.4vw,74px);line-height:.98;letter-spacing:.01em;color:var(--green);
+  text-shadow:0 4px 0 #fff,0 8px 0 var(--yellow),4px 12px 0 rgba(89,37,15,.5);
+  animation:bob 4.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+h1.title em{font-style:normal;display:block;font-family:var(--px);font-size:.19em;color:var(--edge);letter-spacing:.2em;text-shadow:0 2px 0 #fff;margin-top:16px}
+.sub{font-size:17px;color:var(--ink);margin:16px 0 6px;font-weight:700}
+.sub small{display:block;font-weight:600;color:var(--muted);font-size:14px;margin-top:6px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btns .cta{flex:1 1 auto;text-align:center;font-size:17px;padding:13px 22px}
+.mini{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.mini .box{flex:1 1 110px;background:#fff;border:3px solid var(--line);border-radius:14px;padding:9px 11px;box-shadow:0 4px 0 rgba(89,37,15,.28)}
+.mini .box b{display:block;font-family:var(--px);font-size:15px;color:#b46d00;margin-top:3px}
+.mini .box span{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+
+/* 封面相框 */
+.poster{position:relative;padding:16px;perspective:1200px}
+.poster .frame{position:relative;border:6px solid var(--edge);border-radius:20px;overflow:hidden;background:#0b1c3d;
+  box-shadow:0 14px 0 var(--shadow),0 30px 60px rgba(10,20,50,.45);transition:.25s transform;transform:rotate(-1.2deg)}
+.poster:hover .frame{transform:rotate(0deg) translateY(-4px)}
+.poster img{width:100%;aspect-ratio:3/4;object-fit:cover;filter:saturate(1.06)}
+.poster .frame:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.34),transparent 38%,transparent 66%,rgba(255,255,255,.14));pointer-events:none}
+.poster .stamp{position:absolute;top:-10px;right:-8px;z-index:4;background:var(--red);color:#fff;border:4px solid #fff;border-radius:14px;
+  padding:8px 10px;font-family:var(--px);font-size:9px;box-shadow:0 6px 0 rgba(89,37,15,.4);transform:rotate(7deg);text-align:center;line-height:1.7}
+.poster .caption{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;font-size:13px;color:var(--muted);font-weight:700}
+.poster .caption .swap{display:flex;gap:6px}
+.dot{width:26px;height:26px;border-radius:8px;border:3px solid var(--line);background:#fff;cursor:pointer;font-weight:900;color:var(--muted);font-size:12px;line-height:1;
+  display:grid;place-items:center;padding:0;transition:.14s}
+.dot.on{background:var(--green);border-color:var(--green-dark);color:#fff}
+.dot:hover{transform:translateY(-2px)}
+/* 封面標題浮層（只壓在圖上，不影響排版） */
+.overlay-title{position:absolute;left:5%;right:5%;top:5.5%;text-align:center;z-index:3;pointer-events:none;
+  font-weight:900;font-size:clamp(22px,3.3vw,40px);color:#fff;letter-spacing:.06em;
+  text-shadow:0 3px 0 var(--edge),0 -2px 0 var(--edge),2px 0 0 var(--edge),-2px 0 0 var(--edge),0 10px 18px rgba(0,0,0,.35)}
+.overlay-title small{display:block;font-family:var(--px);font-size:.32em;letter-spacing:.16em;color:var(--yellow);margin-top:8px;text-shadow:0 2px 0 var(--edge)}
+
+/* ===== 主頁試玩舞台 ===== */
+.stage{margin-top:14px;border:4px solid var(--edge);border-radius:16px;overflow:hidden;background:#1b1208;box-shadow:0 9px 0 var(--shadow)}
+.stage iframe{display:block;width:100%;height:min(76vh,660px);border:0;background:var(--sky)}
+.loadrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
+#stageHint{font-size:13px;color:var(--muted);font-weight:700}
+
+/* ===== 通用網格 ===== */
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.tile{background:#fff;border:4px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 7px 0 rgba(89,37,15,.3);transition:.18s;position:relative;overflow:hidden}
+.tile:hover{transform:translateY(-4px);border-color:var(--green);box-shadow:0 11px 0 rgba(23,109,54,.32)}
+.tile .n{position:absolute;right:12px;top:6px;font-family:var(--px);font-size:26px;color:rgba(120,55,26,.13)}
+.tile h3{margin:8px 0 6px;font-size:19px;font-weight:900}
+.tile p{margin:0;font-size:14px;color:var(--muted)}
+.tile .ico{width:54px;height:54px}
+.tile .ico svg{width:100%;height:100%}
+
+/* 操作示意 */
+.keys{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.key{min-width:46px;padding:8px 10px;text-align:center;border-radius:10px;border:3px solid var(--edge);background:#fff;
+  font-family:var(--px);font-size:10px;color:var(--ink);box-shadow:0 4px 0 var(--edge)}
+.key.wide{min-width:96px}
+.hint{font-size:13px;color:var(--muted);font-weight:700}
+
+/* 階梯分隔線 */
+.stairs{height:34px;margin:2px 0 0;background:
+  repeating-linear-gradient(90deg,transparent 0 12px,rgba(255,255,255,.5) 12px 24px);
+  -webkit-mask:linear-gradient(#000,#000);mask:linear-gradient(#000,#000);border-radius:8px;opacity:.5}
+
+/* 音符尺 */
+.notes{display:flex;gap:4px;margin-top:12px;align-items:flex-end}
+.note{flex:1;text-align:center;border:3px solid var(--line);border-radius:10px 10px 4px 4px;background:#fff;padding:8px 2px 6px;
+  font-weight:900;font-size:12px;color:var(--muted);position:relative}
+.note b{display:block;font-family:var(--px);font-size:9px;color:var(--edge);margin-top:4px}
+.note.L{background:var(--yellow);border-color:var(--yellow-dark);color:#4d3505;transform:translateY(-6px)}
+.note.R{background:var(--green);border-color:var(--green-dark);color:#fff;transform:translateY(-6px)}
+.note.R b{color:#d8f5c8}
+.note.L b{color:#7c5404}
+
+/* 角色卡 */
+.charCard{display:flex;gap:12px;align-items:center}
+.charCard svg{width:74px;height:96px;flex:none}
+.stat{display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:var(--muted);border-top:2px dashed var(--line);padding-top:5px;margin-top:5px}
+.bar{height:8px;border-radius:999px;background:#efe0bd;overflow:hidden;border:2px solid var(--line)}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--yellow))}
+a.tile{text-decoration:none;color:inherit;display:block}
+a.tile .go{margin-top:12px;font-weight:900;color:var(--green-dark);font-size:14px}
+
+/* 成績表 */
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+th,td{padding:8px 10px;border-bottom:3px dashed var(--line);text-align:left}
+th{font-family:var(--px);font-size:9px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+td.f{font-family:var(--px);font-size:14px;color:var(--green-dark)}
+tr.top td{background:#fff8dc}
+.empty{padding:18px;text-align:center;color:var(--muted);border:3px dashed var(--line);border-radius:12px;background:#fff8e4}
+
+/* 麥克風小工具 */
+.micBox{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.meter{position:relative;flex:1 1 200px;height:16px;border:3px solid var(--edge);border-radius:999px;background:#7a3318;overflow:hidden;min-width:160px}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow));transition:width .07s linear}
+#micNote{font-family:var(--px);font-size:15px;color:var(--green-dark);min-width:130px}
+#micState{font-size:13px;font-weight:800}
+
+/* FAQ / 關於 */
+details{background:#fff;border:3px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
+summary{cursor:pointer;font-weight:900;font-size:15px;list-style:none;display:flex;justify-content:space-between;gap:10px}
+summary:after{content:"+";font-family:var(--px);font-size:14px;color:var(--green-dark)}
+details[open] summary:after{content:"–"}
+details p{margin:10px 0 0;color:var(--muted);font-size:14px}
+ul.tick{list-style:none;padding:0;margin:10px 0 0;font-size:14px;color:var(--muted);font-weight:700}
+ul.tick li{padding-left:26px;position:relative;margin-bottom:7px}
+ul.tick li:before{content:"✔";position:absolute;left:0;color:var(--green-dark);font-weight:900}
+
+footer{position:relative;z-index:2;margin-top:10px;padding:22px 0 30px;border-top:4px solid var(--edge);
+  background:linear-gradient(180deg,rgba(89,37,15,.0),rgba(89,37,15,.22));color:#f6e9cf;font-weight:700;font-size:14px}
+footer .row{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+footer a{color:var(--yellow)}
+.confetti{position:fixed;z-index:40;pointer-events:none;width:9px;height:14px;top:-20px;opacity:.95}
+
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+:focus-visible{outline:4px solid var(--yellow);outline-offset:3px;border-radius:6px}
+
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.hero{grid-template-columns:1fr}.poster{max-width:520px;margin-inline:auto}}
+@media(max-width:660px){.g3,.g2{grid-template-columns:1fr}h2.sec{font-size:27px}.card{padding:18px}nav.links{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div>
+</div>
+
+<div class="ticker" aria-hidden="true">
+  <div class="track" id="tickTrack">
+    <span>🎺 3A 班級遊樂會 ・ 本週六開放體驗</span><span>▼ <b>阿順</b> 一路往下 100 樓</span>
+    <span>🎤 用<b>直笛</b>兩個音就能左右移動</span><span>🎈 小心<b>黑色尖刺氣球</b></span>
+    <span>⌨️ 沒麥克風也能玩：← → 或 A／D</span><span>🏆 成績存在你自己的瀏覽器裡</span>
+  </div>
+</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#top" aria-label="阿順下樓梯 首页">
+      <svg viewBox="0 0 32 32" role="img" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="#5c94fc"/>
+        <rect x="3" y="23" width="8" height="6" fill="#efe2c4" stroke="#78371a" stroke-width="1.6"/>
+        <rect x="11" y="16" width="8" height="6" fill="#efe2c4" stroke="#78371a" stroke-width="1.6"/>
+        <rect x="19" y="9" width="8" height="6" fill="#efe2c4" stroke="#78371a" stroke-width="1.6"/>
+        <circle cx="15" cy="6" r="4.6" fill="#ffd52a" stroke="#78371a" stroke-width="1.6"/>
+        <circle cx="13.6" cy="5.6" r="1" fill="#241d19"/><circle cx="16.8" cy="5.6" r="1" fill="#241d19"/>
+      </svg>
+      <span class="t1">阿順下樓梯<span class="t2">AH-SHUN STAIR RUSH</span></span>
+    </a>
+    <nav class="links" aria-label="主選單">
+      <a href="#play">試玩</a><a href="#how">玩法</a><a href="#hazard">危機</a><a href="#chars">角色</a>
+      <a href="#voice">直笛聲控</a><a href="#board">成績</a><a href="#about">關於</a>
+    </nav>
+    <a class="cta green" href="game.html">▶ 開始下樓</a>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" aria-labelledby="h-title">
+    <div class="card txt">
+      <div class="badges">
+        <span class="tag hot">NEW 2026 校慶版</span>
+        <span class="tag go">單機 HTML・免安裝</span>
+        <span class="tag">鍵盤 / 觸控 / 直笛</span>
+      </div>
+      <div class="kicker">CLASS 3A BOOTH ・ MUSIC-CONTROLLED ACTION</div>
+      <h1 class="title" id="h-title">阿順下樓梯<em>STAIR&nbsp;RUSH</em></h1>
+      <p class="sub">踩著會往下跑的漂浮階梯，一邊閃黑色尖刺氣球、一邊衝樓層。
+        <small>拿到第 3 代模型的班級製作：直笛收音、音準判定、階梯生成全部沿用，主角換成胸前別紅緞帶的阿順。</small>
+      </p>
+      <div class="btns">
+        <a class="cta green" href="game.html?c=shun" data-conf>▶ 開始遊戲（阿順）</a>
+        <a class="cta blue" href="game.html?mode=calib">🎤 設定直笛聲控</a>
+        <a class="cta ghost" href="game.html">⌨️ 鍵盤／觸控模式</a>
+      </div>
+      <div class="mini">
+        <div class="box"><span>最高樓層</span><b id="sBest">0</b></div>
+        <div class="box"><span>我的趟數</span><b id="sRuns">0</b></div>
+        <div class="box"><span>可選角色</span><b>3</b></div>
+        <div class="box"><span>危機種類</span><b>3</b></div>
+      </div>
+    </div>
+
+    <div class="poster">
+      <div class="stamp">100<br>樓<br>挑戰</div>
+      <div class="frame">
+        <div class="overlay-title">阿順下樓梯<small>STAIR RUSH ・ 3A</small></div>
+        <img id="coverImg" src="__DATA_MAIN__" alt="阿順下樓梯遊戲封面：戴圓眼鏡、別紅緞帶的卡通學生從天上的一階階樓梯跳下來，旁邊有黑色尖刺氣球">
+      </div>
+      <div class="caption">
+        <span>遊戲封面／key art（依班服照片風格生成）</span>
+        <span class="swap" role="group" aria-label="切換封面">
+          <button class="dot on" id="covA" title="封面 A：阿順單人">A</button>
+          <button class="dot" id="covB" title="封面 B：雙人溜樓梯">B</button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 主頁試玩 ============ -->
+  <section id="play" aria-labelledby="h-play">
+    <div class="card">
+      <div class="kicker">INLINE DEMO</div>
+      <h2 class="sec" id="h-play">在主頁直接試玩<span class="en">SAME GAME ・ NO INSTALL</span></h2>
+      <p class="lead">按「載入」才會把 <code>game.html</code> 放進來，頁面平時維持輕量；想全螢幕就開新視窗。</p>
+      <div class="loadrow">
+        <button class="cta green" id="btnEmbed" style="text-decoration:none">▶ 載入試玩（阿順）</button>
+        <a class="cta ghost" href="game.html" target="_blank" rel="noopener">↗ 開新視窗玩</a>
+        <span id="stageHint">尚未載入。</span>
+      </div>
+      <div class="stage hidden" id="stage"><iframe id="frame" title="阿順下樓梯 遊戲畫面" allow="microphone; autoplay"></iframe></div>
+    </div>
+  </section>
+
+  <!-- ============ 玩法 ============ -->
+  <section id="how" aria-labelledby="h-how">
+    <div class="card">
+      <div class="kicker">HOW TO PLAY</div>
+      <h2 class="sec" id="h-how">怎麼玩？<span class="en">STEP 01 — 04</span></h2>
+      <p class="lead">樓梯會一直往上捲，你要做的是別被撞飛、別踩空掉出去。踩到越多的階，樓層數就越高。</p>
+      <div class="grid g4" style="margin-top:16px">
+        <div class="tile"><span class="n">01</span>
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="4" y="34" width="18" height="10" rx="3" fill="#efe2c4" stroke="#78371a" stroke-width="3"/><rect x="15" y="22" width="18" height="10" rx="3" fill="#efe2c4" stroke="#78371a" stroke-width="3"/><rect x="26" y="10" width="18" height="10" rx="3" fill="#efe2c4" stroke="#78371a" stroke-width="3"/><path d="M8 32c3-6 6-6 8-2" stroke="#2eaa57" stroke-width="3" fill="none" stroke-linecap="round"/></svg></span>
+          <h3>往下跳</h3><p>人物踩在階梯上，畫面自動捲動；左右移動選擇要落的階。</p></div>
+        <div class="tile"><span class="n">02</span>
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="5" y="17" width="16" height="16" rx="4" fill="#fff" stroke="#78371a" stroke-width="3"/><rect x="27" y="17" width="16" height="16" rx="4" fill="#fff" stroke="#78371a" stroke-width="3"/><path d="M13 25l4 4 4-6M35 25l4 4 4-6" stroke="#2eaa57" stroke-width="3" fill="none" stroke-linecap="round"/></svg></span>
+          <h3>左右閃</h3><p>鍵盤 ← → 或 A／D；手機按畫面左右圓鈕；直笛吹兩個音也能左右。</p></div>
+        <div class="tile"><span class="n">03</span>
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="22" r="14" fill="#22222a" stroke="#78371a" stroke-width="3"/><path d="M24 36c0 4 4 5 4 8" stroke="#bb672d" stroke-width="3" fill="none"/><path d="M17 17l4 4M31 17l-4 4" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M18 28h12l-2 4H20z" fill="#dc4740"/></svg></span>
+          <h3>躲氣球</h3><p>踩到黑色尖刺氣球階 −20 體力，並獲得 1.15 秒無敵；先練節奏再衝。</p></div>
+        <div class="tile"><span class="n">04</span>
+          <span class="ico" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="#ffd52a" stroke="#78371a" stroke-width="3"/><path d="M24 12l3 7 7-2-5 6 5 6-7-2-3 7-3-7-7 2 5-6-5-6 7 2z" fill="#fff8dc" stroke="#c99412" stroke-width="2"/></svg></span>
+          <h3>衝樓層</h3><p>每 25 樓會嗶一聲里程碑，速度逐階加快；掉出樓梯間就結束。</p></div>
+      </div>
+      <div class="keys">
+        <span class="hint">操作：</span>
+        <span class="key">←</span><span class="key">→</span><span class="hint">或</span>
+        <span class="key">A</span><span class="key">D</span><span class="hint">暫停</span>
+        <span class="key">P</span><span class="key">ESC</span><span class="hint">再来一局</span>
+        <span class="key wide">ENTER / SPACE</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 危機 ============ -->
+  <section id="hazard" aria-labelledby="h-haz">
+    <div class="card">
+      <div class="kicker">TILES &amp; HAZARDS</div>
+      <h2 class="sec" id="h-haz">四種階梯，三種陷阱<span class="en">KNOW YOUR STEPS</span></h2>
+      <div class="grid g4" style="margin-top:14px">
+        <div class="tile"><h3>一般台階</h3><p>石階加草皮，最安全也最常见，越後面越窄。</p></div>
+        <div class="tile"><h3>尖刺氣球</h3><p>照片裡那種黑色造型氣球，踩上去 −20 體力並短暫無敵。</p></div>
+        <div class="tile"><h3>電扶梯階</h3><p>黃色箭頭會推著你左右滑，正好用来趕場或害你滑出去。</p></div>
+        <div class="tile"><h3>酥脆台階</h3><p>踩到 0.26 秒後裂開，必须马上走。</p></div>
+      </div>
+      <div class="stairs" aria-hidden="true"></div>
+      <p class="lead" style="margin-top:12px">另外還有<b>天花板</b>：被捲到最上面會被壓，體力持续流失——所以別一直往同一邊躲。</p>
+    </div>
+  </section>
+
+  <!-- ============ 角色 ============ -->
+  <section id="chars" aria-labelledby="h-char">
+    <div class="card">
+      <div class="kicker">CHOOSE YOUR KID</div>
+      <h2 class="sec" id="h-char">三位班級角色<span class="en">STATS CHANGE THE RUN</span></h2>
+      <div class="grid g3" style="margin-top:14px" id="charGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ 直笛聲控 ============ -->
+  <section id="voice" aria-labelledby="h-voice">
+    <div class="card">
+      <div class="kicker">RECORDER PITCH CONTROL</div>
+      <h2 class="sec" id="h-voice">用直笛吹著玩<span class="en">TWO NOTES → LEFT / RIGHT</span></h2>
+      <div class="grid g2" style="margin-top:10px;align-items:start">
+        <div>
+          <p class="lead">進遊戲按 <b>🎤 聲控</b> 或從上面那顆「設定直笛聲控」進來：錄兩個音，之後<b>吹左音往左、吹右音往右</b>。
+             系統每幀做自動相關音高偵測，±70 音分內算命中，並連續兩幀才轉向，避免雜音誤動。</p>
+          <div class="notes" aria-hidden="true">
+            <div class="note">C<b>Do</b></div><div class="note">D<b>Re</b></div><div class="note">E<b>Mi</b></div>
+            <div class="note">F<b>Fa</b></div><div class="note L">F♯<b>升Fa・LEFT</b></div>
+            <div class="note">G<b>Sol</b></div><div class="note">A<b>La</b></div>
+            <div class="note">B<b>Si</b></div><div class="note R">C′♯<b>升Do・RIGHT</b></div>
+          </div>
+          <ul class="tick">
+            <li>預設一鍵套用：升 Fa（F#5）＝左、升 Do（C#6）＝右。</li>
+            <li>沒有直笛？用「手動選音」在小鋼琴上點兩鍵即可。</li>
+            <li>收音太小聲就把靈敏度调到 1.5×–2.5×；有回音就調低。</li>
+            <li>麥克風權限只在本機使用，不留存、不上傳任何音訊。</li>
+          </ul>
+          <a class="cta green" style="display:inline-block;margin-top:14px;text-decoration:none" href="game.html?mode=calib">🎤 進入聲控設定</a>
+        </div>
+        <div class="tile">
+          <h3 style="margin-top:0">現場試吹（測試麥克風）</h3>
+          <p>按開始後對著麥克風吹一個音，看到音名就代表偵測 OK，可以直接進遊戲設定。</p>
+          <div class="micBox" style="margin-top:12px">
+            <button class="cta" id="micTry" style="flex:0 0 auto">開始試吹</button>
+            <div class="meter"><i id="micBar"></i></div>
+            <span id="micNote">—</span>
+          </div>
+          <p style="margin-top:10px"><span id="micState" class="hint">尚未取得麥克風。</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 成績 ============ -->
+  <section id="board" aria-labelledby="h-board">
+    <div class="card">
+      <div class="kicker">LOCAL SCOREBOARD</div>
+      <h2 class="sec" id="h-board">這台裝置的成績<span class="en">STORED IN YOUR BROWSER</span></h2>
+      <p class="lead">紀錄只存在這台裝置的瀏覽器（localStorage），换電腦就會重新開始；校賽計分請用線下登記表。</p>
+      <div id="boardBody"></div>
+      <div class="btns">
+        <button class="cta ghost" id="btnCopy">📋 複製我的成績</button>
+        <button class="cta blue" id="btnClear">🗑 清掉紀錄</button>
+        <a class="cta green" href="game.html">▶ 再去衝一趟</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 關於 ============ -->
+  <section id="about" aria-labelledby="h-ab">
+    <div class="card">
+      <div class="kicker">CREDITS &amp; FAQ</div>
+      <h2 class="sec" id="h-ab">關於這個攤位遊戲<span class="en">MADE BY CLASS 3A</span></h2>
+      <div class="grid g2" style="margin-top:8px;align-items:start">
+        <div>
+          <p class="lead">主頁面 + 遊戲都以<b>單一 HTML 檔</b>完成：Canvas 繪圖、Web Audio 音效與音高偵測，沒有框架、沒有後端。
+             直接把整個資料夾複製到任何電腦，開 <code>index.html</code> 就能玩；封面與角色也是同一風格的插畫。</p>
+          <ul class="tick">
+            <li>建議 Chrome / Edge；直笛聲控需 HTTPS 或 localhost。</li>
+            <li>手機直向玩最顺，按底部兩個圓鈕即可。</li>
+            <li>想改速度／體力：開 <code>game.html</code> 找 <code>CHARS</code>、<code>randGap()</code>。</li>
+            <li>封面可依班級需求再換圖（<code>assets/</code> 內有原始檔）。</li>
+          </ul>
+          <details>
+            <summary>為什麼叫「下樓梯」？</summary>
+            <p>關卡是往下捲的階梯，越下面越快；被天花板壓、掉出樓梯間都算出局，名稱就是玩法本身。</p>
+          </details>
+          <details>
+            <summary>體力 0 會怎樣？</summary>
+            <p>整趟結束，成績寫入本機紀錄；同一台裝置會保留最高樓層與最近 20 趟。</p>
+          </details>
+          <details>
+            <summary>沒麥克風可以比賽嗎？</summary>
+            <p>可以，鍵盤／觸控模式功能完全相同；聲控只是另一種操作方式。</p>
+          </details>
+        </div>
+        <div class="tile">
+          <div class="charCard" style="align-items:center">
+            <img src="__DATA_THUMB__" alt="封面裁切的阿順角色頭像" style="width:110px;height:110px;object-fit:cover;border-radius:14px;border:4px solid var(--edge)">
+            <div>
+              <h3 style="margin-top:0">阿順</h3>
+              <p>班級跑腿王。戴圓眼鏡、別紅緞帶，永遠準時把東西送到——雖然都在跑樓梯。</p>
+            </div>
+          </div>
+          <div class="stat"><span>企劃 / 美術</span><span>3A 班遊小組</span></div>
+          <div class="stat"><span>程式 / 音控</span><span>模型3 → v3 改版</span></div>
+          <div class="stat"><span>音樂偵測</span><span>Auto-Correlation</span></div>
+          <div class="stat"><span>版本</span><span id="ver">v3.0 ・ STAIR</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap row">
+    <span>© <span id="yr">2026</span> 阿順下樓梯 ・ 3A 班級遊樂會 ・ 內部活動使用</span>
+    <span><a href="#top">回到頂端 ▲</a> ・ <a href="game.html">直接開玩 ▶</a></span>
+  </div>
+</footer>
+
+<script>
+"use strict";
+/* ---------- 安全本機儲存（沙箱預覽無 localStorage 也不會壞） ---------- */
+const mem={};
+const store={
+  get(k,d){try{return localStorage.getItem(k)??d}catch(e){return k in mem?mem[k]:d}},
+  set(k,v){try{localStorage.setItem(k,String(v))}catch(e){mem[k]=String(v)}}
+};
+const K_BEST="ahshun.best",K_RUNS="ahshun.runs";
+
+/* ---------- 封面切換 ---------- */
+const covers={A:"__DATA_MAIN__",B:"__DATA_ALT__"};
+const covImg=document.getElementById("coverImg");
+document.getElementById("covA").addEventListener("click",e=>setCover("A",e.currentTarget));
+document.getElementById("covB").addEventListener("click",e=>setCover("B",e.currentTarget));
+function setCover(k,btn){
+  covImg.src=covers[k];
+  covImg.alt=k==="A"
+    ?"封面 A：戴圓眼鏡、別紅緞帶的卡通學生從漂浮石階跳下，旁邊有黑色尖刺氣球"
+    :"封面 B：兩位班級卡通角色沿彩虹階梯溜下，後方有尖刺黑色氣球追";
+  document.querySelectorAll(".dot").forEach(d=>d.classList.remove("on"));
+  btn.classList.add("on");
+}
+
+/* ---------- 成績 ---------- */
+function fmtDate(t){const d=new Date(t);const p=n=>String(n).padStart(2,"0");return `${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+const CHAR_ZH={shun:"阿順",qing:"阿青",mei:"小美"};
+function runs(){try{const r=JSON.parse(store.get(K_RUNS,"[]"));return Array.isArray(r)?r:[];}catch(e){return[]}}
+function renderBoard(){
+  const best=+store.get(K_BEST,0)||0,list=runs();
+  document.getElementById("sBest").textContent=best;
+  document.getElementById("sRuns").textContent=list.length;
+  const host=document.getElementById("boardBody");
+  if(!list.length){host.innerHTML=`<div class="empty" style="margin-top:12px">還沒有紀錄。先去 <b>game.html</b> 衝一趟，這裡就會出現你的成績表。</div>`;return;}
+  const rows=list.slice(0,8).map((r,i)=>`<tr class="${r.f===best&&i===0?"top":""}">
+      <td>${i+1}</td><td class="f">${r.f} 樓</td><td>${CHAR_ZH[r.c]||"阿順"}</td><td>${fmtDate(r.t)}</td></tr>`).join("");
+  host.innerHTML=`<table><thead><tr><th>#</th><th>樓層</th><th>角色</th><th>時間</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+document.getElementById("btnClear").addEventListener("click",()=>{
+  store.set(K_RUNS,"[]");store.set(K_BEST,"0");renderBoard();toast("已清掉本機紀錄");
+});
+document.getElementById("btnCopy").addEventListener("click",async e=>{
+  const best=+store.get(K_BEST,0)||0,list=runs();
+  const txt=`阿順下樓梯｜最高 ${best} 樓・共 ${list.length} 趟（${new Date().toLocaleDateString("zh-TW")}）`;
+  try{await navigator.clipboard.writeText(txt);toast("已複製："+txt);}
+  catch(err){toast(txt);}
+  e.currentTarget.classList.add("on");
+});
+function toast(msg){
+  let t=document.getElementById("_toast");
+  if(!t){t=document.createElement("div");t.id="_toast";
+    t.style.cssText="position:fixed;z-index:60;left:50%;bottom:26px;transform:translateX(-50%);padding:11px 18px;border:4px solid #78371a;border-radius:14px;background:#fff8dc;font-weight:900;box-shadow:0 7px 0 #59250f;transition:.2s opacity";
+    document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity=1;clearTimeout(t._h);t._h=setTimeout(()=>t.style.opacity=0,2200);
+}
+
+/* ---------- 角色卡（與遊戲內 CHARS 數值一致） ---------- */
+const CHARS=[
+  {id:"shun",zh:"阿順",tag:"班級跑腿王",run:255,hp:100,dmg:20,
+   shirt:"#ffd52a",shirtDark:"#e0a90f",shorts:"#2eaa57",skin:"#f2c294",hair:"#241d19",rose:"#dc4740",hairType:"bob",glasses:true,
+   text:"平衡型。速度與體力都中庸，適合第一次下樓的人。"},
+  {id:"qing",zh:"阿青",tag:"飛快但易摔",run:300,hp:85,dmg:22,
+   shirt:"#3b74d9",shirtDark:"#25529e",shorts:"#f8faf5",skin:"#efb987",hair:"#1f1b18",rose:"#ffd52a",hairType:"short",glasses:false,
+   text:"高機動、低體力。左右追階很快，但一次失誤就掉出去。"},
+  {id:"mei",zh:"小美",tag:"穩穩踩好每一步",run:232,hp:128,dmg:12,
+   shirt:"#ff8fc0",shirtDark:"#d84f8b",shorts:"#8e5cf0",skin:"#f6cfae",hair:"#3a221c",rose:"#2eaa57",hairType:"twin",glasses:true,
+   text:"耐久型。移動慢一些，但踩氣球只扣 12，適合撐長跑道。"}
+];
+function charSVG(c){
+  const hair=c.hairType==="bob"
+    ?`<path d="M14 18a11 11 0 0 1 22 0v9H14z" fill="${c.hair}"/><path d="M12 20h4v11h-4zM34 20h4v11h-4z" fill="${c.hair}"/>`
+    :c.hairType==="short"
+    ?`<path d="M13 20a12 12 0 0 1 24 0z" fill="${c.hair}"/><path d="M16 12l3-5 3 5 3-5 3 5 3-5 3 5" fill="${c.hair}"/>`
+    :`<path d="M13 20a12 12 0 0 1 24 0z" fill="${c.hair}"/><ellipse cx="10" cy="28" rx="5" ry="9" fill="${c.hair}"/><ellipse cx="36" cy="28" rx="5" ry="9" fill="${c.hair}"/><circle cx="12" cy="19" r="3" fill="${c.rose}"/><circle cx="34" cy="19" r="3" fill="${c.rose}"/>`;
+  const face=c.glasses
+    ?`<circle cx="24" cy="25" r="4.6" fill="none" stroke="#33231c" stroke-width="1.6"/><circle cx="33" cy="25" r="4.6" fill="none" stroke="#33231c" stroke-width="1.6"/><path d="M28.6 25h-2" stroke="#33231c" stroke-width="1.6"/><circle cx="33.6" cy="25.2" r="1.4" fill="#30231d"/>`
+    :`<circle cx="25" cy="25" r="1.9" fill="#30231d"/><circle cx="32" cy="25" r="1.9" fill="#30231d"/>`;
+  return `<svg viewBox="0 0 48 60" role="img" aria-label="${c.zh}">
+    <ellipse cx="24" cy="57" rx="15" ry="3" fill="rgba(45,76,154,.25)"/>
+    <rect x="15" y="47" width="8" height="7" rx="3" fill="#fff" stroke="#78371a" stroke-width="1.6"/>
+    <rect x="25" y="47" width="8" height="7" rx="3" fill="#fff" stroke="#78371a" stroke-width="1.6"/>
+    <path d="M14 46h20v-7H14z" fill="${c.shorts}" stroke="#78371a" stroke-width="1.6"/>
+    <path d="M13 39h22l-2-12H15z" fill="${c.shirt}" stroke="#78371a" stroke-width="1.8"/>
+    <rect x="13" y="34" width="22" height="4" fill="${c.shirtDark}"/>
+    <circle cx="19" cy="31" r="4.4" fill="${c.rose}" stroke="#78371a" stroke-width="1.2"/>
+    <path d="M17 34l-2 6M21 34l2 6" stroke="${c.rose}" stroke-width="2.4"/>
+    <path d="M35 27l7 4" stroke="#d59a4b" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="28" cy="22" r="10" fill="${c.skin}" stroke="#78371a" stroke-width="1.6"/>
+    ${hair}${face}
+  </svg>`;
+}
+document.getElementById("charGrid").innerHTML=CHARS.map(c=>`
+  <a class="tile" href="game.html?c=${c.id}" data-conf>
+    <div class="charCard">${charSVG(c)}
+      <div style="min-width:0">
+        <h3 style="margin:0 0 2px">${c.zh} <span class="kicker" style="font-size:8px">${c.tag}</span></h3>
+        <p style="font-size:13px">${c.text}</p>
+      </div>
+    </div>
+    <div class="stat"><span>移動速度</span><span>${c.run}</span></div>
+    <div class="bar"><i style="width:${Math.round((c.run-210)/110*100)}%"></i></div>
+    <div class="stat"><span>體力</span><span>${c.hp}</span></div>
+    <div class="bar"><i style="width:${Math.round((c.hp-70)/70*100)}%"></i></div>
+    <div class="stat"><span>氣球傷害</span><span>-${c.dmg}</span></div>
+    <div class="bar"><i style="width:${Math.round((c.dmg-8)/18*100)}%"></i></div>
+    <div class="go">選 ${c.zh} 開始下樓 ▶</div>
+  </a>`).join("");
+
+/* ---------- 試吹麥克風 ---------- */
+(async function(){
+  const btn=document.getElementById("micTry"),bar=document.getElementById("micBar"),note=document.getElementById("micNote"),state=document.getElementById("micState");
+  let actx=null,an=null,buf=null,on=false,raf=0;
+  const NAMES=["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"];
+  async function start(){
+    try{
+      actx=new (window.AudioContext||window.webkitAudioContext)();
+      const s=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+      actx.createMediaStreamSource(s).connect(an=actx.createAnalyser());
+      an.fftSize=2048;an.smoothingTimeConstant=0;buf=new Float32Array(an.fftSize);
+      on=true;btn.textContent="停止";state.textContent="收音中：對著麥克風吹直笛（這個測試不影響遊戲設定）";
+      tick();
+    }catch(e){state.textContent="無法取得麥克風權限；也可以直接進遊戲用鍵盤玩。";btn.disabled=true;}
+  }
+  function stop(){on=false;cancelAnimationFrame(raf);btn.textContent="開始試吹";bar.style.width="0%";note.textContent="—";state.textContent="已停止。";}
+  function tick(){
+    if(!on) return;
+    an.getFloatTimeDomainData(buf);
+    const {f,rms}=pitch(buf,actx.sampleRate);
+    bar.style.width=Math.min(100,rms*900)+"%";
+    if(f>0){const m=Math.round(69+12*Math.log2(f/440));note.textContent=`${NAMES[((m%12)+12)%12]}${Math.floor(m/12)-1} ・ ${f.toFixed(0)}Hz`;}
+    else note.textContent="—";
+    raf=requestAnimationFrame(tick);
+  }
+  function pitch(b,sr){
+    const N=b.length;let rms=0;for(let i=0;i<N;i++)rms+=b[i]*b[i];rms=Math.sqrt(rms/N);
+    if(rms<.012)return{f:-1,rms};
+    let r1=0,r2=N-1,th=.2;
+    for(let i=0;i<N/2;i++)if(Math.abs(b[i])<th){r1=i;break;}
+    for(let i=1;i<N/2;i++)if(Math.abs(b[N-i])<th){r2=N-i;break;}
+    const s=b.slice(r1,r2),n=s.length;if(n<32)return{f:-1,rms};
+    const c=new Float32Array(n);
+    for(let i=0;i<n;i++){let t=0;for(let j=0;j<n-i;j++)t+=s[j]*s[j+i];c[i]=t;}
+    let d=0;while(d<n-1&&c[d]>c[d+1])d++;
+    let mv=-1,mp=-1;for(let i=d;i<n;i++)if(c[i]>mv){mv=c[i];mp=i;}
+    if(mp<=0||c[0]<=0||mv/c[0]<.45)return{f:-1,rms};
+    let T=mp;const x1=c[T-1],x2=c[T],x3=c[T+1],a=(x1+x3-2*x2)/2,bb=(x3-x1)/2;
+    if(a)T=T-bb/(2*a);
+    return{f:sr/T,rms};
+  }
+  btn.addEventListener("click",()=>on?stop():start());
+})();
+
+/* ---------- 一點點彩帶（點擊主 CTA 時） ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-conf]");if(!t) return;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cs=getComputedStyle(t);if(cs.position==="static") t.style.position="relative";
+  for(let i=0;i<16;i++){
+    const s=document.createElement("span");
+    s.className="confetti";
+    s.style.left=(t.getBoundingClientRect().left+Math.random()*t.getBoundingClientRect().width)+"px";
+    s.style.background=["#ffd52a","#2eaa57","#fff","#dc4740","#3b74d9"][i%5];
+    document.body.appendChild(s);
+    s.animate([{transform:`translate(0,-30vh) rotate(0)`,opacity:1},{transform:`translate(${(Math.random()-.5)*160}px,60vh) rotate(${Math.random()*720}deg)`,opacity:.9}],
+      {duration:1200+Math.random()*900,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=()=>s.remove();
+  }
+});
+
+/* ---------- 主頁內嵌試玩：點了才載入，再按一次就卸除 ---------- */
+(function(){
+  const btn=document.getElementById("btnEmbed"),stage=document.getElementById("stage"),
+        frame=document.getElementById("frame"),hint=document.getElementById("stageHint"),pick=CHARS[0];
+  let loaded=false;
+  btn.addEventListener("click",()=>{
+    if(loaded){
+      loaded=false;stage.classList.add("hidden");frame.src="about:blank";
+      btn.textContent="▶ 載入試玩（"+pick.zh+"）";
+      hint.textContent="已暫停並卸除，避免背景繼續跑。";return;
+    }
+    frame.src="game.html?c="+pick.id;loaded=true;
+    stage.classList.remove("hidden");
+    btn.textContent="■ 收起遊戲";
+    hint.textContent="已載入 game.html?c="+pick.id+"（鍵盤 ← → 或底部圓鈕；要直笛聲控請用新視窗）";
+    stage.scrollIntoView({behavior:"smooth",block:"center"});
+  });
+})();
+
+document.getElementById("yr").textContent=new Date().getFullYear();
+renderBoard();
+addEventListener("pageshow",renderBoard);   /* 從遊戲返回時刷新成績 */
+// 跑馬燈內容重複一次以形成無接縫循環
+const tk=document.getElementById("tickTrack");tk.innerHTML+=tk.innerHTML;
+</script>
+</body>
+</html>
