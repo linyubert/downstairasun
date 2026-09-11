@@ -53,7 +53,4 @@ python3 -m http.server 8000   # 開 http://localhost:8000 預覽（直笛聲控�
 * `update()` 裡的 `G.speed=56+Math.min(G.floors*1.05,120)`：捲動速度曲線。
 * `drawPlayer()`／`drawPlat()`：角色與階梯的画法（階梯＝石階＋草、氣球＝黑色尖刺、電扶梯、酥脆階）。
 
-## 換封面
 
-把新圖放進 `assets/`，改 `build.py` 的 `MAP` 對應檔名後重跑 `python3 build.py`；
-`assets/cover_*.jpg` 本身也可直接貼到簡報或海報上使用。
